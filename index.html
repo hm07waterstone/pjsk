@@ -1,186 +1,168 @@
-import { useState, useEffect, useRef } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sekai Score Calculator</title>
 
-export default function SekaiScoreCalculator() {
-  const [perfects, setPerfects] = useState(0);
-  const [greats, setGreats] = useState(0);
-  const [goods, setGoods] = useState(0);
-  const [bads, setBads] = useState(0);
-  const [misses, setMisses] = useState(0);
+  <!-- IMPORTANT: This MUST be opened as .html, NOT .tsx/.jsx -->
 
-  const [displayScore, setDisplayScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#1f2235] text-white flex items-center justify-center h-screen">
 
-  const prevScoreRef = useRef(0);
+<div class="w-full max-w-3xl p-6">
 
-  // Score system (3 / 2 / 1)
-  const rawScore = perfects * 3 + greats * 2 + goods * 1;
-  // Allow up to 6 digits (some songs exceed 99999)
+  <!-- Score -->
+  <div class="mb-6">
+    <p class="text-xs text-white/60">SCORE</p>
+    <div class="flex justify-between items-center">
+      <p id="score" class="text-5xl font-extrabold tracking-wider">0000</p>
+      <p id="rank" class="text-3xl font-extrabold text-gray-400">F</p>
+    </div>
+
+    <div class="flex justify-between text-xs text-white/60 mt-1">
+      <span>Highest Score Achievable</span>
+      <span id="maxScore">0000</span>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="w-full h-2 bg-white/10 rounded-full mb-6 overflow-hidden">
+    <div id="bar" class="h-full bg-gradient-to-r from-pink-400 to-purple-400" style="width:0%"></div>
+  </div>
+
+  <!-- Accuracy -->
+  <div class="flex justify-between mb-8 text-sm">
+    <div>
+      <p class="text-white/60 text-xs">ACCURACY</p>
+      <p id="accuracy" class="font-semibold">0%</p>
+    </div>
+    <div id="status" class="text-right"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="flex justify-between">
+
+    <div class="space-y-2 w-1/2">
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-white">PERFECT</span><input id="p" type="number" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-pink-400">GREAT</span><input id="gr" type="number" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-blue-400">GOOD</span><input id="g" type="number" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-green-400">BAD</span><input id="b" type="number" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-gray-400">MISS</span><input id="m" type="number" class="bg-transparent text-right w-20"/></div>
+    </div>
+
+    <div class="flex flex-col items-end justify-center w-1/2">
+      <p class="text-xs text-white/60">HIGHEST COMBO ACHIEVABLE</p>
+      <p id="combo" class="text-4xl font-bold">0000</p>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+let prevScore = 0;
+
+function getNum(id){
+  const el = document.getElementById(id);
+  return el && el.value !== '' ? Number(el.value) : 0;
+}
+
+function update() {
+  const p = getNum('p');
+  const gr = getNum('gr');
+  const g = getNum('g');
+  const b = getNum('b');
+  const m = getNum('m');
+
+  const total = p + gr + g + b + m;
+
+  // SCORE SYSTEM (3/2/1)
+  const rawScore = p*3 + gr*2 + g*1;
   const score = Math.min(rawScore, 999999);
 
-  const totalNotes = perfects + greats + goods + bads + misses;
+  // MAX SCORE
+  const maxScore = total * 3;
 
-  const maxCombo = totalNotes;
-
-  // Goods now break combo
-  const combo = perfects + greats;
-
-  // New accuracy system (10 / 7 / 5)
-  // Accuracy system ((P*10 + Gr*7 + G*5) / (N*10))
-  const accuracy = totalNotes
-    ? ((perfects * 10 + greats * 7 + goods * 5) / (totalNotes * 10)) * 100
+  // ACCURACY ((P*10 + Gr*7 + G*5) / (N*10))
+  const accuracy = total > 0
+    ? ((p*10 + gr*7 + g*5) / (total*10)) * 100
     : 0;
 
-  // Detection
-  const breaks = goods + bads + misses;
+  const breaks = g + b + m;
+  const hpLost = b*50 + m*75;
 
-  // HP loss system (invisible)
-  const hpLost = bads * 50 + misses * 75;
+  const isAP = total>0 && gr===0 && g===0 && b===0 && m===0;
+  const isFC = total>0 && !isAP && g===0 && b===0 && m===0;
+  const isMastery = total>0 && !isAP && !isFC && breaks<=7;
 
-  const isAP = totalNotes > 0 && greats === 0 && goods === 0 && bads === 0 && misses === 0;
-  const isFC = totalNotes > 0 && !isAP && goods === 0 && bads === 0 && misses === 0;
-  const isMastery = totalNotes > 0 && !isAP && !isFC && breaks <= 7;
+  // RANK SYSTEM
+  let rank = 'F';
+  if (accuracy>=98 && breaks<=7 && hpLost<1000) rank='S';
+  else if (accuracy>=95 && breaks<=15 && hpLost<1000) rank='A';
+  else if (accuracy>=90 && hpLost<1000) rank='B';
+  else if (accuracy>=85 && hpLost<3000) rank='C';
+  else if (accuracy>=80 && hpLost<6000) rank='D';
 
-  // Rank system
-  let rank = "F";
+  let color='text-gray-400';
+  if(rank==='S') color='text-yellow-400';
+  if(rank==='A') color='text-pink-400';
+  if(rank==='B') color='text-blue-400';
+  if(rank==='C'||rank==='D') color='text-green-400';
 
-  // S requires BOTH high accuracy and low breaks
-  if (accuracy >= 98 && breaks <= 7 && hpLost < 1000) rank = "S";
-  else if (accuracy >= 95 && breaks <= 15 && hpLost < 1000) rank = "A";
-  else if (accuracy >= 90 && hpLost < 1000) rank = "B";
-  else if (accuracy >= 85 && hpLost < 3000) rank = "C";
-  else if (accuracy >= 80 && hpLost < 6000) rank = "D";
+  if(isAP) color='text-white';
+  else if(isFC) color='text-pink-400';
+  else if(isMastery) color='text-purple-400';
 
-  let rankColor = "text-gray-400";
+  animateScore(score);
 
-  if (rank === "S") rankColor = "text-yellow-400";
-  if (rank === "A") rankColor = "text-pink-400";
-  if (rank === "B") rankColor = "text-blue-400";
-  if (rank === "C" || rank === "D") rankColor = "text-green-400";
+  document.getElementById('maxScore').textContent = maxScore.toString().padStart(maxScore>=100000?6:maxScore>=10000?5:4,'0');
+  document.getElementById('accuracy').textContent = accuracy.toFixed(2)+'%';
+  document.getElementById('combo').textContent = total.toString().padStart(4,'0');
 
-  // Override color with status
-  if (isAP) rankColor = "text-white";
-  else if (isFC) rankColor = "text-pink-400";
-  else if (isMastery) rankColor = "text-purple-400";
+  const rankEl = document.getElementById('rank');
+  rankEl.textContent = rank;
+  rankEl.className = 'text-3xl font-extrabold '+color;
 
-  useEffect(() => {
-    let start = prevScoreRef.current;
-    const end = score;
-    const duration = 400;
-    const startTime = performance.now();
+  const status = document.getElementById('status');
+  status.innerHTML='';
+  if(isAP) status.innerHTML='<p class="text-white">ALL PERFECT</p>';
+  else if(isFC) status.innerHTML='<p class="text-pink-400">FULL COMBO</p>';
+  else if(isMastery) status.innerHTML='<p class="text-purple-400">MASTERY</p>';
 
-    function animate(now) {
-      const progress = Math.min((now - startTime) / duration, 1);
-      const value = Math.floor(start + (end - start) * progress);
-      setDisplayScore(value);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        prevScoreRef.current = end;
-        setHighScore((prev) => Math.max(prev, end));
-      }
-    }
-
-    requestAnimationFrame(animate);
-  }, [score]);
-
-  return (
-    <div className="flex h-screen bg-[#1f2235] text-white items-center justify-center">
-      <div className="w-full max-w-3xl p-6">
-
-        {/* Score Section */}
-        <div className="mb-6">
-          <p className="text-xs text-white/60">SCORE</p>
-          <div className="flex items-center justify-between">
-            <p className="text-5xl font-extrabold tracking-wider">
-              {displayScore.toString().padStart(displayScore >= 100000 ? 6 : displayScore >= 10000 ? 5 : 4, "0")}
-            </p>
-            <p className={`text-3xl font-extrabold ${rankColor}`}>
-              {rank}
-            </p>
-          </div>
-
-          <div className="flex justify-between text-xs text-white/60 mt-1">
-            <span>Highest Score Achievable</span>
-            <span>{(totalNotes * 3).toString().padStart(totalNotes * 3 >= 100000 ? 6 : totalNotes * 3 >= 10000 ? 5 : 4, "0")}</span>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="w-full h-2 bg-white/10 rounded-full mb-6 overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-pink-400 to-purple-400"
-            style={{ width: `${Math.min(accuracy, 100)}%` }}
-          />
-        </div>
-
-        {/* Accuracy + Status */}
-        <div className="flex justify-between mb-8 text-sm">
-          <div>
-            <p className="text-white/60 text-xs">ACCURACY</p>
-            <p className="font-semibold">{accuracy.toFixed(2)}%</p>
-          </div>
-
-          <div className="text-right">
-            {isAP && <p className="text-white font-semibold">ALL PERFECT</p>}
-            {isFC && <p className="text-pink-400 font-semibold">FULL COMBO</p>}
-            {isMastery && <p className="text-purple-400 font-semibold">MASTERY</p>}
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex justify-between">
-
-          {/* Judgements */}
-          <div className="space-y-2 w-1/2">
-            <RowInput label="PERFECT" value={perfects} setValue={setPerfects} color="text-white" />
-            <RowInput label="GREAT" value={greats} setValue={setGreats} color="text-pink-400" />
-            <RowInput label="GOOD" value={goods} setValue={setGoods} color="text-blue-400" />
-            <RowInput label="BAD" value={bads} setValue={setBads} color="text-green-400" />
-            <RowInput label="MISS" value={misses} setValue={setMisses} color="text-gray-400" />
-          </div>
-
-          {/* Combo */}
-          <div className="flex flex-col items-end justify-center w-1/2">
-            <p className="text-xs text-white/60">HIGHEST COMBO ACHIEVABLE</p>
-            <p className="text-4xl font-bold">
-              {maxCombo.toString().padStart(4, "0")}
-            </p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
+  document.getElementById('bar').style.width = Math.min(accuracy,100)+'%';
 }
 
-function RowInput({ label, value, setValue, color }) {
-  const [focused, setFocused] = useState(false);
+function animateScore(target){
+  const start = prevScore;
+  const duration = 400;
+  const startTime = performance.now();
 
-  const displayValue = focused
-    ? value === 0
-      ? ""
-      : value
-    : value === 0
-    ? ""
-    : value;
+  function frame(now){
+    const progress = Math.min((now-startTime)/duration,1);
+    const val = Math.floor(start + (target-start)*progress);
 
-  return (
-    <div className="flex justify-between items-center border-b border-white/10 pb-1">
-      <span className={`${color} tracking-wide`}>{label}</span>
-      <input
-        type="number"
-        value={displayValue}
-        placeholder="0000"
-        onFocus={() => setFocused(true)}
-        onBlur={(e) => {
-          setFocused(false);
-          if (e.target.value === "") setValue(0);
-        }}
-        onChange={(e) => setValue(Number(e.target.value))}
-        className="bg-transparent text-right w-20 outline-none font-semibold placeholder:text-gray-500"
-        min="0"
-      />
-    </div>
-  );
+    document.getElementById('score').textContent =
+      val.toString().padStart(val>=100000?6:val>=10000?5:4,'0');
+
+    if(progress < 1) requestAnimationFrame(frame);
+    else prevScore = target;
+  }
+
+  requestAnimationFrame(frame);
 }
+
+// SAFE EVENT BINDING
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('input').forEach(i => {
+    i.addEventListener('input', update);
+  });
+
+  update();
+});
+
+</script>
+
+</body>
+</html>
