@@ -13,7 +13,7 @@ C: Accuracy of 85%+ and a loss of less than 3000 health <br>
 D: Accuracy of 80%+ and a loss of less than 6000 health <br>
 F: A failiure to reach 80%+ Accuracy or losing more than 6000 pts of health
 
-In addition to these, three subranks are also in the calculator:
+In addition to these, three subranks are also in the calculator. A plus is added to a rank when a subrank (that isn't mastery) is used:
 
 All Perfect: Every note is a perfect <br>
 Full Combo: No combo breaks are detected (Perfects or Greats) <br>
@@ -24,4 +24,5 @@ Health is a hidden mechanic of the calculator. It starts from 0 and decreased ba
 https://www.sekaipedia.org/wiki/Rhythm_game_mechanics#Judgement
 
 ## Accuracy
-Accuracy is also based on the in-game score calculation. Perfects give 100%, Greats give 70%, and Goods give 50%. Missing or hitting a note badly results in 0% accuracy.
+Accuracy is also based on the in-game score calculation. Perfects give 100%, Greats give 70%, and Goods give 50%. Missing or hitting a note badly results in 0% accuracy. Since Accuracy cards influence this score, it is reccomended to calculate without them in your team
+.
