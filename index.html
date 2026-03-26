@@ -5,15 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sekai Score Calculator</title>
 
-  <!-- IMPORTANT: This MUST be opened as .html, NOT .tsx/.jsx -->
-
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#1f2235] text-white flex items-center justify-center h-screen">
 
 <div class="w-full max-w-3xl p-6">
 
-  <!-- Score -->
+  <!Score>
   <div class="mb-6">
     <p class="text-xs text-white/60">SCORE</p>
     <div class="flex justify-between items-center">
@@ -27,12 +25,12 @@
     </div>
   </div>
 
-  <!-- Progress -->
+  <!Progress>
   <div class="w-full h-2 bg-white/10 rounded-full mb-6 overflow-hidden">
     <div id="bar" class="h-full bg-gradient-to-r from-pink-400 to-purple-400" style="width:0%"></div>
   </div>
 
-  <!-- Accuracy -->
+  <!Accuracy>
   <div class="flex justify-between mb-8 text-sm">
     <div>
       <p class="text-white/60 text-xs">ACCURACY</p>
@@ -41,7 +39,7 @@
     <div id="status" class="text-right"></div>
   </div>
 
-  <!-- Content -->
+  <!Content>
   <div class="flex justify-between">
 
     <div class="space-y-2 w-1/2">
@@ -78,19 +76,17 @@ function update() {
 
   const total = p + gr + g + b + m;
 
-  // SCORE SYSTEM (3/2/1)
+  // SCORE SYSTEM
   const rawScore = p*3 + gr*2 + g*1;
   const score = Math.min(rawScore, 999999);
-
-  // MAX SCORE
   const maxScore = total * 3;
 
-  // ACCURACY ((P*10 + Gr*7 + G*5) / (N*10))
+  // ACCURACY
   const accuracy = total > 0
     ? ((p*10 + gr*7 + g*5) / (total*10)) * 100
     : 0;
 
-  const breaks = g + b + m;
+  const faults = g + b + m;
   const hpLost = b*50 + m*75;
 
   const isAP = total>0 && gr===0 && g===0 && b===0 && m===0;
@@ -99,8 +95,8 @@ function update() {
 
   // RANK SYSTEM
   let rank = 'F';
-  if (accuracy>=98 && breaks<=7 && hpLost<1000) rank='S';
-  else if (accuracy>=95 && breaks<=15 && hpLost<1000) rank='A';
+  if (accuracy>=98 && faults<=7 && hpLost<1000) rank='S';
+  else if (accuracy>=95 && faults<=15 && hpLost<1000) rank='A';
   else if (accuracy>=90 && hpLost<1000) rank='B';
   else if (accuracy>=85 && hpLost<3000) rank='C';
   else if (accuracy>=80 && hpLost<6000) rank='D';
