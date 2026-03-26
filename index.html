@@ -43,11 +43,11 @@
   <div class="flex justify-between">
 
     <div class="space-y-2 w-1/2">
-      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-white">PERFECT</span><input id="p" type="number" value="0" min="0" class="bg-transparent text-right w-20"/></div>
-      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-pink-400">GREAT</span><input id="gr" type="number" value="0" min="0" class="bg-transparent text-right w-20"/></div>
-      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-blue-400">GOOD</span><input id="g" type="number" value="0" min="0" class="bg-transparent text-right w-20"/></div>
-      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-green-400">BAD</span><input id="b" type="number" value="0" min="0" class="bg-transparent text-right w-20"/></div>
-      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-gray-400">MISS</span><input id="m" type="number" value="0" min="0" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-white">PERFECT</span><input id="p" type="number" value="0" min="0" step="1" inputmode="numeric" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-pink-400">GREAT</span><input id="gr" type="number" value="0" min="0" step="1" inputmode="numeric" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-blue-400">GOOD</span><input id="g" type="number" value="0" min="0" step="1" inputmode="numeric" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-green-400">BAD</span><input id="b" type="number" value="0" min="0" step="1" inputmode="numeric" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-gray-400">MISS</span><input id="m" type="number" value="0" min="0" step="1" inputmode="numeric" class="bg-transparent text-right w-20"/></div>
     </div>
 
     <div class="flex flex-col items-end justify-center w-1/2">
@@ -71,7 +71,15 @@ function getNum(id){
     return 0;
   }
 
-  return Math.max(0, Number(el.value));
+  // force integer + no negatives
+  const num = Math.floor(Number(el.value));
+  if (num < 0) {
+    el.value = 0;
+    return 0;
+  }
+
+  el.value = num; // remove decimals visually
+  return num;
 }
 
 function update() {
@@ -163,6 +171,11 @@ window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('input').forEach(i => {
     i.addEventListener('input', () => {
       if (i.value === '') i.value = 0;
+      
+      let val = Math.floor(Number(i.value));
+      if (isNaN(val) || val < 0) val = 0;
+      i.value = val;
+
       update();
     });
 
