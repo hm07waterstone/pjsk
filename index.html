@@ -134,8 +134,14 @@ function update() {
   document.getElementById('accuracy').textContent = accuracy.toFixed(2)+'%';
   document.getElementById('combo').textContent = total.toString().padStart(4,'0');
 
+  // Add + ranks for FC/AP
+  let displayRank = rank;
+  if ((isFC || isAP) && rank !== 'F') {
+    displayRank = rank + '+';
+  }
+
   const rankEl = document.getElementById('rank');
-  rankEl.textContent = rank;
+  rankEl.textContent = displayRank;
   rankEl.className = 'text-3xl font-extrabold '+color;
 
   const status = document.getElementById('status');
@@ -169,14 +175,42 @@ function animateScore(target){
 // SAFE EVENT BINDING
 window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('input').forEach(i => {
+
+    // Arrow key controls (+ shift = +10)
+    i.addEventListener('keydown', (e) => {
+      let val = Number(i.value) || 0;
+
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        val += e.shiftKey ? 10 : 1;
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        val -= e.shiftKey ? 10 : 1;
+      }
+
+      if (val < 0) val = 0;
+      i.value = val;
+      update();
+    });
+
     i.addEventListener('input', () => {
       if (i.value === '') i.value = 0;
-      
+
       let val = Math.floor(Number(i.value));
       if (isNaN(val) || val < 0) val = 0;
       i.value = val;
 
       update();
+    });
+
+    i.addEventListener('blur', () => {
+      if (i.value === '') i.value = 0;
+    });
+  });
+
+  update();
+});
     });
 
     i.addEventListener('blur', () => {
