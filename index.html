@@ -55,6 +55,16 @@
       <p id="combo" class="text-4xl font-bold">0000</p>
     </div>
 
+    <!-- Difference + Export -->
+  <div class="mt-6 flex justify-between items-center">
+    <div>
+      <p class="text-xs text-white/60">DIFFERENCE</p>
+      <p id="diff" class="font-semibold">0000</p>
+    </div>
+
+    <button id="copyBtn" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm">
+      Copy Results
+    </button>
   </div>
 
 </div>
@@ -98,6 +108,9 @@ function update() {
   // MAX SCORE
   const maxScore = total * 3;
 
+  // DIFFERENCE (score - maxScore)
+  const diff = score - maxScore;
+
   // ACCURACY ((P*10 + Gr*7 + G*5) / (N*10))
   const accuracy = total > 0
     ? ((p*10 + gr*7 + g*5) / (total*10)) * 100
@@ -133,6 +146,7 @@ function update() {
   document.getElementById('maxScore').textContent = maxScore.toString().padStart(maxScore>=100000?6:maxScore>=10000?5:4,'0');
   document.getElementById('accuracy').textContent = accuracy.toFixed(2)+'%';
   document.getElementById('combo').textContent = total.toString().padStart(4,'0');
+  document.getElementById('diff').textContent = diff.toString();
 
   // Add + ranks for FC/AP
   let displayRank = rank;
@@ -151,6 +165,14 @@ function update() {
   else if(isMastery) status.innerHTML='<p class="text-purple-400">MASTERY</p>';
 
   document.getElementById('bar').style.width = Math.min(accuracy,100)+'%';
+
+  // STORE FOR EXPORT
+  window._exportData = {
+    score,
+    rank: displayRank,
+    diff,
+    accuracy: accuracy.toFixed(2) + '%'
+  };
 }
 
 function animateScore(target){
@@ -207,6 +229,14 @@ window.addEventListener('DOMContentLoaded', () => {
     i.addEventListener('blur', () => {
       if (i.value === '') i.value = 0;
     });
+  });
+
+    // Copy button
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    const d = window._exportData;
+    const text = `${d.score} ${d.rank} ${d.diff} ${d.accuracy}`;
+
+    navigator.clipboard.writeText(text);
   });
 
   update();
