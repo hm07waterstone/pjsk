@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sekai Score Calculator</title>
-
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#1f2235] text-white flex items-center justify-center h-screen">
@@ -43,28 +42,33 @@
   <div class="flex justify-between">
 
     <div class="space-y-2 w-1/2">
-      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-white">PERFECT</span><input id="p" type="number" value="0" min="0" step="1" inputmode="numeric" class="bg-transparent text-right w-20"/></div>
-      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-pink-400">GREAT</span><input id="gr" type="number" value="0" min="0" step="1" inputmode="numeric" class="bg-transparent text-right w-20"/></div>
-      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-blue-400">GOOD</span><input id="g" type="number" value="0" min="0" step="1" inputmode="numeric" class="bg-transparent text-right w-20"/></div>
-      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-green-400">BAD</span><input id="b" type="number" value="0" min="0" step="1" inputmode="numeric" class="bg-transparent text-right w-20"/></div>
-      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-gray-400">MISS</span><input id="m" type="number" value="0" min="0" step="1" inputmode="numeric" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-white">PERFECT</span><input id="p" type="number" value="0" min="0" step="1" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-pink-400">GREAT</span><input id="gr" type="number" value="0" min="0" step="1" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-blue-400">GOOD</span><input id="g" type="number" value="0" min="0" step="1" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-green-400">BAD</span><input id="b" type="number" value="0" min="0" step="1" class="bg-transparent text-right w-20"/></div>
+      <div class="flex justify-between border-b border-white/10 pb-1"><span class="text-gray-400">MISS</span><input id="m" type="number" value="0" min="0" step="1" class="bg-transparent text-right w-20"/></div>
     </div>
 
-    <div class="flex flex-col items-end justify-center w-1/2">
-      <p class="text-xs text-white/60">HIGHEST COMBO ACHIEVABLE</p>
-      <p id="combo" class="text-4xl font-bold">0000</p>
+    <div class="flex flex-col items-end justify-center w-1/2 space-y-2">
+      <div class="text-right">
+        <p class="text-xs text-white/60">HIGHEST COMBO ACHIEVABLE</p>
+        <p id="combo" class="text-4xl font-bold">0000</p>
+      </div>
+
+      <div class="text-right">
+        <p class="text-xs text-white/60">DIFFERENCE</p>
+        <p id="diff" class="font-semibold">0000</p>
+      </div>
     </div>
 
-    <!-- Difference + Export -->
-  <div class="mt-6 flex justify-between items-center">
-    <div>
-      <p class="text-xs text-white/60">DIFFERENCE</p>
-      <p id="diff" class="font-semibold">0000</p>
-    </div>
+  </div>
 
-    <button id="copyBtn" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm">
+  <!-- Copy Button -->
+  <div class="mt-8 text-center">
+    <button id="copyBtn" class="bg-white/10 hover:bg-white/20 px-6 py-2 rounded-lg text-sm">
       Copy Results
     </button>
+    <p id="copiedMsg" class="text-lime-400 text-sm mt-2 opacity-0 transition-opacity duration-1000">Copied!</p>
   </div>
 
 </div>
@@ -81,14 +85,13 @@ function getNum(id){
     return 0;
   }
 
-  // force integer + no negatives
   const num = Math.floor(Number(el.value));
   if (num < 0) {
     el.value = 0;
     return 0;
   }
 
-  el.value = num; // remove decimals visually
+  el.value = num;
   return num;
 }
 
@@ -101,35 +104,31 @@ function update() {
 
   const total = p + gr + g + b + m;
 
-  // SCORE SYSTEM (3/2/1)
   const rawScore = p*3 + gr*2 + g*1;
   const score = Math.min(rawScore, 999999);
-
-  // MAX SCORE
   const maxScore = total * 3;
-
-  // DIFFERENCE (score - maxScore)
   const diff = score - maxScore;
 
-  // ACCURACY ((P*10 + Gr*7 + G*5) / (N*10))
   const accuracy = total > 0
     ? ((p*10 + gr*7 + g*5) / (total*10)) * 100
     : 0;
 
-  const breaks = g + b + m;
+  const faults = g + b + m;
   const hpLost = b*50 + m*75;
 
   const isAP = total>0 && gr===0 && g===0 && b===0 && m===0;
   const isFC = total>0 && !isAP && g===0 && b===0 && m===0;
-  const isMastery = total>0 && !isAP && !isFC && breaks<=7;
+  const isMastery = total>0 && !isAP && !isFC && faults<=7;
 
-  // RANK SYSTEM
   let rank = 'F';
-  if (accuracy>=98 && breaks<=7 && hpLost<1000) rank='S';
-  else if (accuracy>=95 && breaks<=15 && hpLost<1000) rank='A';
+  if (accuracy>=98 && faults<=7 && hpLost<1000) rank='S';
+  else if (accuracy>=95 && faults<=15 && hpLost<1000) rank='A';
   else if (accuracy>=90 && hpLost<1000) rank='B';
   else if (accuracy>=85 && hpLost<3000) rank='C';
   else if (accuracy>=80 && hpLost<6000) rank='D';
+
+  let displayRank = rank;
+  if ((isFC || isAP) && rank !== 'F') displayRank = rank + '+';
 
   let color='text-gray-400';
   if(rank==='S') color='text-yellow-400';
@@ -146,13 +145,7 @@ function update() {
   document.getElementById('maxScore').textContent = maxScore.toString().padStart(maxScore>=100000?6:maxScore>=10000?5:4,'0');
   document.getElementById('accuracy').textContent = accuracy.toFixed(2)+'%';
   document.getElementById('combo').textContent = total.toString().padStart(4,'0');
-  document.getElementById('diff').textContent = diff.toString();
-
-  // Add + ranks for FC/AP
-  let displayRank = rank;
-  if ((isFC || isAP) && rank !== 'F') {
-    displayRank = rank + '+';
-  }
+  document.getElementById('diff').textContent = diff;
 
   const rankEl = document.getElementById('rank');
   rankEl.textContent = displayRank;
@@ -166,12 +159,11 @@ function update() {
 
   document.getElementById('bar').style.width = Math.min(accuracy,100)+'%';
 
-  // STORE FOR EXPORT
   window._exportData = {
     score,
     rank: displayRank,
     diff,
-    accuracy: accuracy.toFixed(2) + '%'
+    accuracy: accuracy.toFixed(2)+'%'
   };
 }
 
@@ -194,11 +186,8 @@ function animateScore(target){
   requestAnimationFrame(frame);
 }
 
-// SAFE EVENT BINDING
 window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('input').forEach(i => {
-
-    // Arrow key controls (+ shift = +10)
     i.addEventListener('keydown', (e) => {
       let val = Number(i.value) || 0;
 
@@ -218,11 +207,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     i.addEventListener('input', () => {
       if (i.value === '') i.value = 0;
-
       let val = Math.floor(Number(i.value));
       if (isNaN(val) || val < 0) val = 0;
       i.value = val;
-
       update();
     });
 
@@ -231,12 +218,18 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-    // Copy button
   document.getElementById('copyBtn').addEventListener('click', () => {
     const d = window._exportData;
-    const text = `${d.score} ${d.rank} ${d.diff} ${d.accuracy}`;
+    const text = `${d.rank} ${d.score} [${d.diff}] ${d.accuracy}`;
 
     navigator.clipboard.writeText(text);
+
+    const msg = document.getElementById('copiedMsg');
+    msg.style.opacity = '1';
+
+    setTimeout(() => {
+      msg.style.opacity = '0';
+    }, 2000);
   });
 
   update();
