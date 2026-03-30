@@ -110,7 +110,7 @@ function update() {
   const diff = score - maxScore;
 
   const accuracy = total > 0
-    ? ((p*10 + gr*6 + g*3 + b*1) / (total*10)) * 100
+    ? ((p*10 + gr*5 + g*2 + b*0.5) / (total*10)) * 100
     : 0;
 
   const faults = g + b + m;
@@ -121,8 +121,8 @@ function update() {
   const isMastery = total>0 && !isAP && !isFC && faults<=7;
 
   let rank = 'F';
-  if (accuracy>=98 && faults<=7 && hpLost<1000) rank='S';
-  else if (accuracy>=95 && faults<=15 && hpLost<1000) rank='A';
+  if (accuracy>=97 && faults<=7 && hpLost<1000) rank='S';
+  else if (accuracy>=94 && faults<=15 && hpLost<1000) rank='A';
   else if (accuracy>=90 && hpLost<1000) rank='B';
   else if (accuracy>=85 && hpLost<3000) rank='C';
   else if (accuracy>=80 && hpLost<6000) rank='D';
