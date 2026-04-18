@@ -3,6 +3,10 @@ The competitive score calculator is live!
 https://hm07waterstone.github.io/pjsk/ <br>
   <br>
   <br>
+## A quick note
+This project was made with AI. I would _not_ like to do that, but I have other projects that are not vibe coded. At some point, I will recreate this on my own.
+<br>
+<br>
 ## Ranking System
 The ranks are reflected on a couple of criteria and are meant to help more accurately display your skill (especially when comparing it to the map you played). Here is how each rank works:
 
